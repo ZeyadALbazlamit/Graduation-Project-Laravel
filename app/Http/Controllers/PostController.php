@@ -37,14 +37,14 @@ class PostController extends Controller
     {
       $post=new post;
       //$post->=$request->
- //$post->user-id=$request->user-id
-  //$post->category-id=$request->category-id
-   //$post->Description=$request->Description
-    //$post->price=$request->price
-     //$post->location=$request->location
-      //$post->pro=$request->pro
-//$post->save();
-
+ $post->user_id=$request->user_id;
+  $post->category_id=$request->category_id;
+  $post->Description=$request->Description;
+    $post->price=$request->price;
+     $post->location=$request->location;
+      $post->pro=$request->pro;//json
+     $post->save();
+return respone()->json($post);
     }
 
     /**
@@ -55,7 +55,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return response()->json($post);
+        return response()->json(User::find($post));
     }
 
     /**

@@ -16,7 +16,7 @@ class CategoryController extends Controller
     {
             return response()->json(category::all());
     }
-    
+
     /**
      * Show the form for creating a new resource.
      *
@@ -35,7 +35,11 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+         $cat=new  category();
+         $cat->name=$request->name;
+         $cat->img=$request->img;
+         $cat->save();
+         return response()->json($cat);
     }
 
     /**
