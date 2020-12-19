@@ -16,7 +16,7 @@ class CreateImgCollectionsTable extends Migration
         Schema::create('img_collections', function (Blueprint $table) {
             $table->id();
             $table->integer('post_id');
-            $table->integer('img');
+            $table->longText('img');
             $table->timestamps();
         });
     }

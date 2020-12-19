@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Favorite;
 use Illuminate\Http\Request;
 
-
-
-use App\User;
-
-class UserController extends Controller
+class FavoriteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-      return response()->json(User::all());
+        //
     }
 
     /**
@@ -38,28 +35,32 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $favorite=new Favorite;
+        $favorite->user_id=$favorite->user_id;
+        $favorite->post_id=$favorite->post_id;;
+        $favorite->save();
+
+
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Favorite  $favorite
      * @return \Illuminate\Http\Response
      */
-    public function show( $user)
+    public function show(Favorite $favorite)
     {
-
-        return response()->json( ["user"=>User::find($user),'post'=>User::find($user)->post,"favorite"=> User::find($user)->favorite]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
+     *Favorite
+     * @param  \App\Favorite  $favorite
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Favorite $favorite)
     {
         //
     }
@@ -68,30 +69,22 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Favorite  $favorite
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Favorite $favorite)
     {
-        $user=User::find($id);
-        switch ($request) {
-         case $request->has('name'): $user->name=$request->name;
-         case $request->has('email'): $user->email=$request->email;
-         case $request->has('img'): $user->img=$request->img;
-         case $request->has('phone_number'): $user->phone_number=$request->phone_number;
-         case $request->has('rate'): $user->rate=($user->rate+$request->rate)/5; 
-       }
-       $user->save();
-      return response()->json($user);
+        //
     }
+
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Favorite  $favorite
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Favorite $favorite)
     {
-        //
+        Favorite::find($favorite)->delete();
     }
 }

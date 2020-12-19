@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
 
 use App\comment;
 use App\User;
@@ -55,7 +56,8 @@ class CommentController extends Controller
      */
     public function show( $Post)
     {
-        return  response()->json(Post::find($Post)->comments);
+        return  response()->json( DB::select('select user_id,post_id, body,name,img, comments.created_at date from users
+             join comments  where users.id=comments.user_id  and post_id=:postid',['postid'=>$Post]) );
     }
 
 

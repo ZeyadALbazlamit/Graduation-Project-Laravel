@@ -17,13 +17,18 @@ class CreatePostsTable extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('category_id');
-            $table->longText('Description');
-            $table->integer('price');
-            $table->Text('location');
-            $table->json('pro');
-///////////////////////////////////////////
-$table->softDeletes();
+         //   $table->Text('category_name');
+         $table->Text('title')->nullable();
+            $table->Text('Sub_Category_name');
+            $table->longText('Description')->nullable();
+            $table->integer('price')->nullable();
+            $table->Text('location')->nullable();
+            $table->json('pro')->nullable();
+            $table->integer('rate')->nullable();
+            $table->longText('main_img')->nullable();
 
+///////////////////////////////////////////
+            $table->softDeletes();
             $table->timestamps();
         });
     }

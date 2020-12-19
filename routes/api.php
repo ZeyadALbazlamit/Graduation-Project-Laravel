@@ -20,6 +20,7 @@ Route::Resource('/Post', 'postController');
 Route::Resource('/Category', 'categoryController');
 Route::Resource('/User', 'UserController');
 Route::Resource('/Comment', 'CommentController');
+Route::Resource('/img', 'imgCollectionController');
 
 
 ////////////

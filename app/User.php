@@ -47,4 +47,13 @@ class User extends Authenticatable
     return $this->hasMany(SocialAccount::class);
 }
 
+public function post()
+{
+    return $this->hasMany('App\Post');
+}
+public function favorite()
+{
+    return $this->hasMany('App\Favorite');
+}
+
 }

@@ -2,10 +2,11 @@ Graduation-Project-Laravel
 echo "# Graduation-Project-Laravel" >> README.md
 git init
 git add .
-git commit -m "store"
+git commit -m "edit comment"
 git branch -M main
 git remote add origin https://github.com/ZeyadALbazlamit/Graduation-Project-react.git
 git remote add origin https://github.com/ZeyadALbazlamit/Graduation-Project-Laravel.git
 git push -u origin main
 
 Graduation-Project-Laravel
+git pull -u origin main

@@ -14,7 +14,7 @@ class ImgCollectionController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(imgCollection::all());
     }
 
     /**
@@ -35,7 +35,10 @@ class ImgCollectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+
+
+
     }
 
     /**
