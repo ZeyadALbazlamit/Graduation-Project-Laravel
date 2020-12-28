@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Favorite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FavoriteController extends Controller
 {
@@ -35,12 +36,18 @@ class FavoriteController extends Controller
      */
     public function store(Request $request)
     {
-        $favorite=new Favorite;
-        $favorite->user_id=$favorite->user_id;
-        $favorite->post_id=$favorite->post_id;;
-        $favorite->save();
+        $c=DB::select('select favorites.id id from favorites where  user_id=:userId and post_id=:postId ', ["userId"=>$request->user_id,"postId"=>$request->post_id]);
+        if ($c) {
 
-
+            DB::delete('delete from favorites where favorites.id=:Id ', ["Id"=>$c[0]->id]);
+            return response()->json('deleted');
+        } else {
+            $favorite=new Favorite;
+            $favorite->user_id=$request->user_id;
+            $favorite->post_id=$request->post_id;
+            $favorite->save();
+            return response()->json($favorite);
+        }
     }
 
     /**

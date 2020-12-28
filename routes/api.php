@@ -16,12 +16,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('login/{provider}', 'Auth\SocialAccountController@redirectToProvider');
 Route::get('login/{provider}/callback', 'Auth\SocialAccountController@handleProviderCallback');
 //////////////
-Route::Resource('/Post', 'postController');
+
 Route::Resource('/Category', 'categoryController');
+Route::Resource('/intrests', 'InterestsController');
 Route::Resource('/User', 'UserController');
 Route::Resource('/Comment', 'CommentController');
 Route::Resource('/img', 'imgCollectionController');
+Route::Resource('/Post', 'postController');
+Route::post('/Post/byCategory/{category_id}','postController@byCategory');
+Route::post('/Post/search','postController@search');
 
+Route::Resource('/favorite', 'FavoriteController');
 
 ////////////
 Route::get('/Message', function ( ) {
@@ -46,8 +51,6 @@ if ($request->data) {
 }
 return '00000';
   });
-
-
 Route::middleware('auth')-> get('/recipient', function ( ) {
 return view('recipient');
 });

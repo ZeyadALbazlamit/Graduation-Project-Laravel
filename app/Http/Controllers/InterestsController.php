@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Interests;
 use Illuminate\Http\Request;
 
-
-
-use App\User;
-
-class UserController extends Controller
+class InterestsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-      return response()->json(User::all());
+        return response()->json(Interests::all());
     }
 
     /**
@@ -38,59 +35,54 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $int =new Interests();
+        $int->category_id=$request->category_id;
+        $int->user_id= $request->user_id;
+        $int->save();
+        return response()->json("done");
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Interests  $interests
      * @return \Illuminate\Http\Response
      */
-    public function show( $user)
+    public function show(Interests $interests)
     {
-
-        return response()->json( ["user"=>User::find($user),'post'=>User::find($user)->post,"favorite"=> User::find($user)->favorite]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Interests  $interests
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Interests $interests)
     {
-       return reponse()->json(User::find($id));
+        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Interests  $interests
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Interests $interests)
     {
-        $user=User::find($id);
-        switch ($request) {
-         case $request->has('name'): $user->name=$request->name;
-         case $request->has('email'): $user->email=$request->email;
-         case $request->has('img'): $user->img=$request->img;
-         case $request->has('phone_number'): $user->phone_number=$request->phone_number;
-         case $request->has('rate'): $user->rate=($user->rate+$request->rate)/5;
-       }
-       $user->save();
-      return response()->json($user);
+        //
     }
+
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Interests  $interests
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Interests $interests)
     {
         //
     }

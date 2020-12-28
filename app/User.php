@@ -56,4 +56,12 @@ public function favorite()
     return $this->hasMany('App\Favorite');
 }
 
+public function interest()
+{
+    return $this->hasMany('App\Interests');
+}
+
+
+
+
 }
