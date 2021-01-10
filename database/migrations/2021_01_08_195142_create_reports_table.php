@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInterestsTable extends Migration
+class CreateReportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateInterestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('interests', function (Blueprint $table) {
+        Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id');
-            $table->integer('user_id');
-            $table->string("count");
+                $table->integer('user_id');
+                $table->integer('post_id');
+                $table->string('report');
             $table->timestamps();
         });
     }
@@ -26,9 +26,13 @@ class CreateInterestsTable extends Migration
      * Reverse the migrations.
      *
      * @return void
+     *
+     *
+     *
+     * 
      */
     public function down()
     {
-        Schema::dropIfExists('interests');
+        Schema::dropIfExists('reports');
     }
 }

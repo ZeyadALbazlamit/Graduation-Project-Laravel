@@ -19,7 +19,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        return DB::select('select id,Sub_Category_name,price,rate,created_at ,main_img from posts');
+        return DB::select('select id,title,Sub_Category_name,price,rate,created_at ,main_img from posts');
     }
 
     /**
@@ -78,18 +78,29 @@ class PostController extends Controller
 
     public function byCategory($post, Request $request)
     {
-        if ($request->location=="كل المدن") {
-            $posts=DB::select('select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  category_id=? limit ?,?', [$post,($request->page-1)*$request->count,$request->count  ]);
-        } else {
-            $posts=DB::select('select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where location in (?) and  category_id=? limit ?,?', [$request->location,$post,($request->page-1)*$request->count,$request->count  ]);
-        }
+    $posts=DB::select('select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where location '.$request->location.' and  category_id=? order by '.$request->order_by.' limit ?,?', [$post,($request->page-1)*$request->count,$request->count  ]);
+
 
         $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts where category_id=:p)  ', ["p"=>$post,"userId"=>$request->user_id]);
+        $count=DB::select("select count(*) count from posts    where  category_id=?  and location  ".$request->location. " GROUP BY id  order by ".$request->order_by ."  ",[$post]);
+
+        $in=DB::select("select id from interests where user_id=? and category_id=? ", [$request->user_id,$post]);
+        if (count($in)>0) {
+            $int=interests::find($in[0]->id);
+            $int->count=$int->count+1;
+            $int->save();
+        }
+     else {
         $int =new Interests();
         $int->category_id=$post;
-        $int->user_id= $request->user_id;
+        $int->user_id=$request->user_id;
+        $int->count=1;
         $int->save();
-        return response()->json(['posts'=>$posts,"fav"=>$fav]);
+    }
+
+
+
+        return response()->json(['posts'=>$posts,"fav"=>$fav,"count"=>count($count)]);
     }
 
     public function search(Request $request)
@@ -107,17 +118,25 @@ class PostController extends Controller
         return response()->json( $int);
 */
 
-        //select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where category_id !=13 //all
-        //select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  Sub_Category_name=   "ستيرو - مسجلات - راديو"
-        switch ($request->type) {
+if($request->order_by=="Recommended"){
 
-                case "product":$res= searchByProduct($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
+
+}
+    //select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where category_id !=13 //all
+    //select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  Sub_Category_name=   "ستيرو - مسجلات - راديو"
+    switch ($request->type) {
+           // select  posts.id ,posts.price,posts.location,interests.category_id,count from posts join interests where posts.category_id=interests.category_id and interests.user_id=2 order by  count desc
+           case "product":$res= searchByProduct($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
                 case "service":$res =searchByService($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
-                case "search":$res =search($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
+              //  case "search":$res =search($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
                 case "text":$res =searchByText($request->user_id, $request->page, $request->count, $request->text, $request->order_by, $request->location);break;
-
+               case 'Recommended': $res= searchByRecommended($request->user_id, $request->page, $request->count, $request->order_by, $request->location);break;
+               case "company":$res=searchByCompany( $request->com_id,$request->user_id );  break;
+               case "user":$res=searchByUser($request->name);  break;
+               case "posts":$res=searchByPosts($request->title);  break;
     }
-        return response()->json($res);
+
+    return response()->json($res);
     }
     /**
      * Show the form for editing the specified resource.
@@ -148,9 +167,10 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy($id)
     {
-        //
+       DB::delete('delete from posts where id=?',[$id]);
+       return response()->json(['messge'=>'was  deleted']);
     }
 }
 
@@ -162,24 +182,18 @@ class PostController extends Controller
      } else {
          $posts= DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location in (? ) and  category_id !=13 order by ? limit ?,? ", [$loc,$order,$page * $count ,$count]);
      }*/
-     $posts= DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  category_id !=13  and location ".$loc. "  order by ". $order. " limit ?,? ", [$page * $count ,$count]);
+     $posts= DB::select("select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  category_id !=13  and location ".$loc. "  order by ". $order. " limit ?,? ", [$page * $count ,$count]);
 
-     $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts where category_id !=13)', ["userId"=>$userId]);
-     $count=DB::select("select count(*) count from posts where category_id !=13");
+     $fav=DB::select('select post_id from favorites  where favorites.user_id=? and post_id in(select id from posts where category_id !=13   and location '.$loc. "  order by ". $order. "  )", [$userId]);
+     $count=DB::select("select count(*) count from posts     where category_id !=13");
      return ['posts'=>$posts,"fav"=>$fav ,"count"=>$count[0]->count];
  }
 
  function searchByService($userId, $page, $count, $order, $loc)
  {
      $page --;
-     $posts= DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  category_id=13  and location ".$loc. "  order by ". $order. " limit ?,? ", [$page * $count ,$count]);
+     $posts= DB::select("select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  where  category_id=13  and location ".$loc. "  order by ". $order. " limit ?,? ", [$page * $count ,$count]);
 
-     /*
-     if ($loc=="كل المدن") {
-         $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where    category_id =13 order by ? limit ?,? ", [$order,$page * $count ,$count]);
-     } else {
-         $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location in (? ) and  category_id =13 order by ? limit ?,? ", [$loc,$order,$page * $count ,$count]);
-     }*/
      $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts where category_id=13)', ["userId"=>$userId]);
      $count=DB::select("select count(*) count from posts where category_id =13");
      return ['posts'=>$posts,"fav"=>$fav ,"count"=>$count[0]->count];
@@ -189,67 +203,87 @@ function search($userId, $page, $count, $order, $loc)
 
     $page --;
 
-    $posts= DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location  ".$loc. "  order by ".$order ." limit ?,? ", [$page * $count ,$count]);
-/*
-    if ($loc=="كل المدن") {
-        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts  order by ?  limit ?,? ", [$order,$page * $count ,$count]);
-    } else {
+    $posts= DB::select("select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location  ".$loc. "  order by ".$order ." limit ?,? ", [$page * $count ,$count]);
 
-        //$posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location  in (? ) order by ?  limit ?,? ", [$loc,$order,$page * $count ,$count]);
-    }*/
-    $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts )', ["userId"=>$userId]);
-    $count=DB::select("select count(*) count from posts");
+    $fav=DB::select('select post_id from favorites  where favorites.user_id=؟ and post_id in(select id from posts    where location  '.$loc. "  order by ".$order .")", [$userId]);
+    $count=DB::select("select count(*) count from posts    where   location  ".$loc. "  order by ".$order ."  ");
     return ['posts'=>$posts,"fav"=>$fav ,"count"=>$count[0]->count];
 }
 function searchByText($userId, $page, $count, $text, $order, $loc)
 {
     $page --;
-    if(ord($text)>57)
+    if(ord($text[1])>57)
 {
 
-$posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where   location  ".$loc. "  and  title=?  order by ".$order. " limit ?,? ", [ $text,$page * $count ,$count]);
-
-/*
-    if ($loc=="كل المدن") {
-        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where    title=?  order by ? limit ?,? ", [ $text,$order,$page * $count ,$count]);
-    } else {
-        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where  location in (? ) and  title=?  order by ? limit ?,? ", [ $loc,$text,$order,$page * $count ,$count]);
-    }
-
-    */
-
-
-    $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts )', ["userId"=>$userId]);
-    $count=DB::select("select count(*) count from posts");
-
-
-$cat=DB::select(' select id from posts where title =? ',[$text]);
-if (count($cat)>0) {
-    $int =new Interests();
-    $int->category_id=$cat[0]->id;
-    $int->user_id=$userId;
-    $int->save();
-}
-
+$posts=DB::select("select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where   location  ".$loc. "  and  title like ?  order by ".$order. " limit ?,? ", [ $text,$page * $count ,$count]);
+$fav=DB::select('select post_id from favorites  where favorites.user_id=? and post_id in(select id from posts where   location  '.$loc. "  and  title like ?  order by ".$order. '  )', [$userId,$text]);
+$count=DB::select("select id  from posts where   location  ".$loc. "  and  title like ?  order by ".$order, [ $text]);
 
 }
 else{
-/*
-    if ($loc=="كل المدن") {
-        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where    id=?  order by ? limit ?,? ", [ $text,$order,$page * $count ,$count]);
-    } else {
-        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where  location in (? ) and  id=?  order by ? limit ?,? ", [ $loc,$text,$order,$page * $count ,$count]);
-    }
+    /*
+        if ($loc=="كل المدن") {
+            $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where    id=?  order by ? limit ?,? ", [ $text,$order,$page * $count ,$count]);
+        } else {
+            $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where  location in (? ) and  id=?  order by ? limit ?,? ", [ $loc,$text,$order,$page * $count ,$count]);
+        }
 
-    */
-    $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where  location ".$loc." and  id=? order by ".$order." limit ?,? ", [ $text,$page * $count ,$count]);
+        */
+    $posts=DB::select("select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where  location ".$loc." and  id like ? order by ".$order." limit ?,? ", [ $text,$page * $count ,$count]);
     $fav=DB::select('select post_id from favorites  where favorites.user_id=:userId and post_id in(select id from posts )', ["userId"=>$userId]);
-    $count=DB::select("select count(*) count from posts");
-
-    $int =new Interests();
-    $int->category_id=Post::find($text)->category_id;
-    $int->user_id=$userId;
-    $int->save();
+    $count=DB::select("select id from posts where  location ".$loc." and  id like ? order by ".$order, [ $text,$page * $count ,$count]);
+   /* $cat=[];
+    $cat=DB::select(' select category_id from posts where id =? ', [$text]);
+    if (property_exists($cat[0], 'id')) {
+        $in=DB::select("select id from interests where user_id=? and category_id=? ", [$userId,$cat[0]->id]);
+        if (count($in)>0) {
+            $int=interests::find($in[0]->id);
+            $int->count=$int->count+1;
+            $int->save();
+        } else {
+            $int =new Interests();
+            $int->category_id=$cat[0]->id;
+            $int->user_id=$userId;
+            $int->count=1;
+            $int->save();
+        }
+    }*/
 }
-    return ['posts'=>$posts,"fav"=>$fav ,"count"=>$count[0]->count];
+
+    return ['posts'=>$posts,"fav"=>$fav ,"count"=>count($count)];
+}
+
+function searchByRecommended($userId, $page, $count, $order, $loc)
+{
+    $page --;
+    $posts =DB::select('select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts join interests where posts.category_id=interests.category_id and interests.user_id=? and location '.$loc.'  order by  count desc, '.$order.' limit ?,?',[$userId,$page * $count ,$count]);
+    /*
+    if ($loc=="كل المدن") {
+        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where    category_id =13 order by ? limit ?,? ", [$order,$page * $count ,$count]);
+    } else {
+        $posts=DB::select("select posts.id id,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where location in (? ) and  category_id =13 order by ? limit ?,? ", [$loc,$order,$page * $count ,$count]);
+    }*/
+    $fav=DB::select('select post_id from favorites  where favorites.user_id=? and post_id in( select posts.id  from posts join interests where posts.category_id=interests.category_id and interests.user_id=? and location '.$loc.'  order by  count desc, '.$order .')', [$userId,$userId]);
+    $count=DB::select('select posts.id id from  posts join interests where posts.category_id=interests.category_id and interests.user_id=? and location '.$loc.'  order by  count desc, '.$order,[$userId]);
+    return ['posts'=>$posts,"fav"=>$fav ,"count"=>count($count)];
+}
+ function searchByCompany($id,$userId)
+{
+    $posts =DB::select('select posts.id id,title,Sub_Category_name,price,rate,posts.created_at created_at ,main_img from posts where user_id =? ',[$id]);
+    $fav=DB::select('select post_id from favorites  where favorites.user_id=? and post_id in (select posts.id from posts where user_id =?) ',[$userId,$id]);
+    return ['posts'=>$posts,"fav"=>$fav];
+
+}
+
+function searchByUser($name)
+{
+    $users =DB::select('select id ,img , name ,location ,phone_number from users where name like ?',[$name]);
+    return ["users"=>$users];
+
+}
+function searchByPosts($title)
+{
+    $posts =DB::select('select * from posts where title like ?',[$title]);
+    return ["posts"=>$posts];
+
 }

@@ -34,4 +34,7 @@ class Post extends Model
     {
         return $this->belongsTo('App\User');
     }
+    public function report(){
+    return $this->hasMany('App\Report');
+}
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInterestsTable extends Migration
+class CreateCartsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class CreateInterestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('interests', function (Blueprint $table) {
+        Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id');
             $table->integer('user_id');
-            $table->string("count");
+            $table->integer("post_id");
+            $table->integer("count")->default(0);
+            $table->string("color")->default("default");
+            $table->softDeletes();
+            $table->boolean("submit")->default(false);
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ class CreateInterestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('interests');
+        Schema::dropIfExists('carts');
     }
 }

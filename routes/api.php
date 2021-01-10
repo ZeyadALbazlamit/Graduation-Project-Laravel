@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::get('login/{provider}', 'Auth\SocialAccountController@redirectToProvider');
 Route::get('login/{provider}/callback', 'Auth\SocialAccountController@handleProviderCallback');
+
 //////////////
 
 Route::Resource('/Category', 'categoryController');
@@ -22,13 +22,26 @@ Route::Resource('/intrests', 'InterestsController');
 Route::Resource('/User', 'UserController');
 Route::Resource('/Comment', 'CommentController');
 Route::Resource('/img', 'imgCollectionController');
+
 Route::Resource('/Post', 'postController');
 Route::post('/Post/byCategory/{category_id}','postController@byCategory');
 Route::post('/Post/search','postController@search');
 
+Route::Resource('/cart', 'CartController');
+Route::get('/cart/showOrder/{com_id}','CartController@showOrder');
+
 Route::Resource('/favorite', 'FavoriteController');
+Route::Resource('/rate', 'RateController');
+
+Route::post('/stors','UserController@showStore');
+
+
+Route::Resource('/dashBoard', 'DashboardController');
+
+Route::Resource('/report', 'ReportController');
 
 ////////////
+
 Route::get('/Message', function ( ) {
    event(new  App\Events\puplicMessage("Hello baby"));
     return '$success';
@@ -65,11 +78,6 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/react-Message', function () {
 return view('comment');
-});
-Route::get('/DashBoard', function () {
-    $counts=['User'=>App\User::count(),'Post'=>App\Post::count(),'Comment'=>App\comment::count(),'Category'=>App\category::count()];
-
-    return view('DashBoard',["counts"=>$counts]);
 });
 
 ///////////////\

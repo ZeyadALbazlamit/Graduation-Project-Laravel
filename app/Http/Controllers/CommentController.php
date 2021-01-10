@@ -44,7 +44,9 @@ class CommentController extends Controller
      $comment->body=$request->body;
      $comment->user_id=$request->user_id;
      $comment->save();
-     $comment->UserName=  User::find($request->user_id)->name; // App\Comment::find($comment->user_id) ;
+        if($comment)
+            $comment->UserName=User::find($request->user_id)->name; // App\Comment::find($comment->user_id) ;
+
       return response()->json($comment);
     }
 

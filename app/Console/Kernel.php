@@ -15,7 +15,11 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         //
     ];
-
+    protected $middleware = [
+        //...
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+];
     /**
      * Define the application's command schedule.
      *

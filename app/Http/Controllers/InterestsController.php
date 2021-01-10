@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Interests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InterestsController extends Controller
 {
@@ -35,11 +36,21 @@ class InterestsController extends Controller
      */
     public function store(Request $request)
     {
-        $int =new Interests();
-        $int->category_id=$request->category_id;
-        $int->user_id= $request->user_id;
-        $int->save();
-        return response()->json("done");
+        $int=DB::select('select id from interests where user_id=? and category_id=?',[$request->user_id,$request->category_id]);
+if (count($int)>0) {
+    $int=Interests::find($int[0]->id);
+    $int->count=$int->count+1;
+$int->save();
+return response()->json("old");
+}else{
+    $int =new Interests();
+    $int->category_id=$request->category_id;
+    $int->user_id= $request->user_id;
+    $int->count=1;
+    $int->save();
+    return response()->json("new");
+}
+
     }
 
     /**
